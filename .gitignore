@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Save data / ROM dumps (large binaries, not for version control)
+backup/
+dump/
+snapshots/
+*.ps2
+*.bin
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# OS / editor
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
