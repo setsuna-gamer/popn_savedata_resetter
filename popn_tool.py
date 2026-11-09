@@ -7,7 +7,7 @@
       --keep plays,extra | plays | extra | none   プレイ済み情報を残す指定 (省略時は各バージョンの既定)
   python popn_tool.py set-plays <カード.ps2> [--game old|popn7|...] [--min 1] [--dry-run]
       全曲・全譜面のプレイ回数を最低 --min 回にする (フリーモードで選曲できるようにする用途)
-      old = popn7 / popn8 / popn9 / besthits (省略時)
+      old = popn7 / besthits / popn8 / popn9 (省略時)
   python popn_tool.py restore-played <カード.ps2> --from <バックアップ.ps2> --game popn7 [--keep ...]
       リセット済みのカードに、バックアップからプレイ済み情報だけを書き戻す
 
@@ -49,6 +49,10 @@ PROFILES = {
                   ranking=dict(start=0xA8, groups=56, per=5),
                   records=dict(mode="slots", start=0xDC8, end=0x20C4, default_score=10000,
                                keep=("plays", "extra"))),
+    "besthits": dict(title="pop'n music BEST HITS!", dir="BISLPM-62288popnb",
+                     ranking=dict(start=0x60, groups=10, per=5),
+                     records=dict(mode="slots", start=0x2B8, end=0xCD8, default_score=10000,
+                                   keep=("plays", "extra"))),
     "popn8": dict(title="pop'n music 8", dir="BISLPM-65316popn8",
                   ranking=dict(start=0xAC, groups=76, per=5),
                   records=dict(mode="slots", start=0x127C, end=0x271C, default_score=10000,
@@ -63,10 +67,6 @@ PROFILES = {
     "popn11": dict(title="pop'n music 11", dir="BISLPM-66065popn11",
                    ranking=dict(start=0x144, groups=60, per=5),
                    records=dict(mode="slots", start=0xF54, end=0x3B34, default_score=0)),
-    "besthits": dict(title="pop'n music BEST HITS!", dir="BISLPM-62288popnb",
-                     ranking=dict(start=0x60, groups=10, per=5),
-                     records=dict(mode="slots", start=0x2B8, end=0xCD8, default_score=10000,
-                                   keep=("plays", "extra"))),
     "popn12": dict(
         title="pop'n music 12 いろは",
         dir="BISLPM-66314popn12",
@@ -287,7 +287,7 @@ def cmd_restore(args):
     print(t("done"))
 
 
-OLD_GAMES = ["popn7", "popn8", "popn9", "besthits"]
+OLD_GAMES = ["popn7", "besthits", "popn8", "popn9"]
 
 
 def cmd_setplays(args):

@@ -33,7 +33,7 @@ python popn_tool.py set-plays card.ps2 --game old --min 1
 python popn_tool.py restore-played card.ps2 --from backup.ps2 --game popn7
 ```
 
-- `--game`: `popn7` `popn8` `popn9` `popn10` `popn11` `popn12` `besthits` `all` (`set-plays` also accepts `old` = popn7/8/9/besthits)
+- `--game`: `popn7` `besthits` `popn8` `popn9` `popn10` `popn11` `popn12` `all` (`set-plays` also accepts `old` = popn7/besthits/8/9)
 - `--keep`: `plays,extra` / `plays` / `extra` / `none` (what to keep; defaults to each version's default)
 - `--dry-run`: preview only, do not write
 - `--lang`: display language, `ja` or `en` (place it before the subcommand; defaults to the OS locale or the `POPN_LANG` environment variable)
