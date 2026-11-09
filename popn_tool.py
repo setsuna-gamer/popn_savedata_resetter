@@ -25,7 +25,12 @@ import time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ps2mc  # noqa: E402
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, "frozen", False):  # PyInstaller でビルドされた実行ファイル
+    HERE = os.path.dirname(os.path.abspath(sys.executable))
+    if ".app" + os.sep + "Contents" in HERE:  # macOS の .app バンドルの外側に置く
+        HERE = HERE.split(".app" + os.sep + "Contents")[0].rsplit(os.sep, 1)[0]
+else:
+    HERE = os.path.dirname(os.path.abspath(__file__))
 
 # ---- バージョンごとの定義 (解析済みのもののみ) ----
 # ranking : 12 バイト (score u32 + name 8byte) のエントリが 5 件 x groups 組並ぶ表
@@ -169,7 +174,8 @@ def restore_played(buf, old, prof, keep):
 
 def pcsx2_running():
     try:
-        out = subprocess.run(["tasklist"], capture_output=True).stdout.lower()
+        cmd = ["tasklist"] if os.name == "nt" else ["ps", "-A", "-o", "comm="]
+        out = subprocess.run(cmd, capture_output=True).stdout.lower()
     except OSError:
         return False
     return b"pcsx2" in out
