@@ -1,65 +1,71 @@
 # popn_savedata_resetter
 
-PS2 版 pop'n music のセーブデータ（PCSX2 のメモリーカードイメージ `.ps2` / `.bin`）を改変するツールです。
-GUI 版 (tkinter) と CLI 版があります。
+**English** | [日本語](README.ja.md)
 
-## 対応タイトル
+A tool for modifying pop'n music (PS2) save data stored in PCSX2 memory card images (`.ps2` / `.bin`).
+It comes with a GUI (tkinter) and a CLI, both available in Japanese and English.
 
-pop'n music 7 / 8 / 9 / 10 / 11 / 12 いろは / BEST HITS!
+## Supported titles
 
-## 機能
+pop'n music 7 / 8 / 9 / 10 / 11 / 12 Iroha / BEST HITS!
 
-| コマンド | 内容 |
+## Features
+
+| Command | Description |
 |---|---|
-| `info` | カード内のセーブデータ情報を表示 |
-| `reset-records` | ランキング・レコードをリセット（プレイ回数・クリア印を残す指定も可） |
-| `set-plays` | 全曲・全譜面のプレイ回数を最低 N 回にする（フリーモードで選曲できるようにする用途） |
-| `restore-played` | リセット済みカードへ、バックアップからプレイ済み情報だけを書き戻す |
+| `info` | Show the save data found on the card |
+| `reset-records` | Reset rankings and records (optionally keeping play counts / clear marks) |
+| `set-plays` | Raise the play count of every song and chart to at least N (so songs can be picked in Free Mode) |
+| `restore-played` | Write only the "played" info from a backup back into a card that has already been reset |
 
-## 使い方
+## Usage
 
-実行ファイルは [Releases](https://github.com/setsuna-gamer/popn_savedata_resetter/releases) から入手できます（Windows / macOS / Linux）。
-または Python 3 で直接実行できます。
+Prebuilt executables are available from [Releases](https://github.com/setsuna-gamer/popn_savedata_resetter/releases) (Windows / macOS / Linux).
+You can also run it directly with Python 3:
 
 ```bash
 python popn_gui.py                                   # GUI
 python popn_tool.py info card.ps2
+python popn_tool.py --lang en info card.ps2          # choose the display language (ja / en)
 python popn_tool.py reset-records card.ps2 --game popn12 --dry-run
 python popn_tool.py reset-records card.ps2 --game all --keep plays,extra
 python popn_tool.py set-plays card.ps2 --game old --min 1
 python popn_tool.py restore-played card.ps2 --from backup.ps2 --game popn7
 ```
 
-- `--game`: `popn7` `popn8` `popn9` `popn10` `popn11` `popn12` `besthits` `all`（`set-plays` は `old` = popn7/8/9/besthits も可）
-- `--keep`: `plays,extra` / `plays` / `extra` / `none`（残す情報。省略時は各バージョンの既定）
-- `--dry-run`: 書き込まず確認のみ
+- `--game`: `popn7` `popn8` `popn9` `popn10` `popn11` `popn12` `besthits` `all` (`set-plays` also accepts `old` = popn7/8/9/besthits)
+- `--keep`: `plays,extra` / `plays` / `extra` / `none` (what to keep; defaults to each version's default)
+- `--dry-run`: preview only, do not write
+- `--lang`: display language, `ja` or `en` (place it before the subcommand; defaults to the OS locale or the `POPN_LANG` environment variable)
 
-## 安全のために
+In the GUI, switch between 日本語 and English with the "Language" box at the top (your choice is remembered).
 
-- 書き込み前に `backup/` へタイムスタンプ付きでカードを自動バックアップします。
-- PCSX2 起動中は書き込みを拒否します（カード破損防止）。必ず終了してから実行してください。
-- ファイルの同サイズ上書きのみ行い、FAT／ディレクトリ構造は変更しません。書き込んだページの ECC は再計算します。
-- 重要なデータは、本ツールの自動バックアップとは別にも必ず取っておいてください。
+## Safety
 
-## ビルド
+- Before writing, the card is automatically backed up to `backup/` with a timestamp.
+- Writing is refused while PCSX2 is running (to avoid corrupting the card). Always quit it first.
+- Files are only overwritten at the same size; the FAT and directory structure are never changed. The ECC of written pages is recalculated.
+- Keep your own backups of important data in addition to this tool's automatic backup.
+
+## Build
 
 ```bash
 pip install pyinstaller
 python build.py
 ```
 
-`dist/` に `popn_savedata_resetter_gui` と `popn_savedata_resetter_cli` が出力されます。
-クロスコンパイルはできないため各 OS 上で実行してください。`v*` タグを push すると GitHub Actions が 3 OS 向けにビルドし、Releases に公開します。
+`popn_savedata_resetter_gui` and `popn_savedata_resetter_cli` are produced in `dist/`.
+Cross-compilation is not possible, so run it on each OS. Pushing a `v*` tag makes GitHub Actions build for all three OSes and publish to Releases.
 
-## 免責事項・注意事項
+## Disclaimer
 
-- **自己責任でご利用ください。** 本ツールの使用によって生じたいかなる損害（セーブデータの破損・消失など）についても、作者は責任を負いません。
-- 本ツールは**非公式**のものであり、株式会社コナミアミューズメント／コナミグループ、およびソニー・インタラクティブエンタテインメントとは一切関係ありません。**これらの企業へ本ツールについて問い合わせないでください。**
-- 「pop'n music」「PlayStation 2」などの名称は各社の商標または登録商標です。
-- 本リポジトリにはゲームのデータ（ROM・ディスクイメージ・セーブデータ）は含まれていません。ご自身が正当に所有するデータに対してのみ使用してください。
-- 予告なく**公開を終了する場合があります**（リポジトリの削除・非公開化、Releases の取り下げなど）。
-- 不具合報告は GitHub の Issues で受け付けますが、対応は保証しません。
+- **Use at your own risk.** The author is not liable for any damage (such as corrupted or lost save data) caused by using this tool.
+- This is an **unofficial** tool and is not affiliated with Konami Amusement / the Konami Group or Sony Interactive Entertainment in any way. **Please do not contact those companies about this tool.**
+- "pop'n music", "PlayStation 2" and other names are trademarks or registered trademarks of their respective owners.
+- This repository contains no game data (ROMs, disc images, or save data). Use it only with data you legitimately own.
+- The project may be **taken down without notice** (repository deleted or made private, Releases withdrawn, etc.).
+- Bug reports are accepted via GitHub Issues, but a response is not guaranteed.
 
-## ライセンス
+## License
 
 [MIT License](LICENSE)

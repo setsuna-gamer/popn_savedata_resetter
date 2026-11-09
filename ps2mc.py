@@ -5,6 +5,7 @@
 - 書き込んだページの ECC は再計算する (実カードのスペア領域から逆算したアルゴリズム)
 """
 import struct
+from i18n import t
 
 PAGE = 512
 
@@ -57,10 +58,10 @@ class Card:
         elif n % 512 == 0:
             self.stride = 512
         else:
-            raise ValueError("メモリーカードイメージとして認識できません")
+            raise ValueError(t("mc_not_card_image"))
         sb = self._page(0)
         if not sb.startswith(b"Sony PS2 Memory Card Format"):
-            raise ValueError("PS2 メモリーカードではありません")
+            raise ValueError(t("mc_not_ps2"))
         self.page_size, self.ppc, self.ppb = struct.unpack_from("<HHH", sb, 0x28)
         (self.clusters, self.alloc_off, self.alloc_end,
          self.root) = struct.unpack_from("<IIII", sb, 0x30)
@@ -137,7 +138,7 @@ class Card:
 
     def write_file(self, entry, content):
         if len(content) != entry.length:
-            raise ValueError("ファイルサイズが変わる書き込みは未対応です")
+            raise ValueError(t("mc_size_change"))
         pad = content + b"\0" * (-len(content) % self.csize)
         old = self._read_chain(entry.cluster)
         for k, c in enumerate(self.chain(entry.cluster)):
