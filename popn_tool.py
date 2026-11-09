@@ -217,7 +217,20 @@ def cmd_info(args):
         print(f"{key:7s} {dn:22s} {len(buf):6d}B  checksum@{hex(pos) if pos else '?':7s} [{sup}]")
 
 
+def confirm_all_games():
+    """--game omitted: ask before touching every title. Returns True to continue."""
+    try:
+        ans = input(t("confirm_all", games=", ".join(PROFILES))).strip().lower()
+    except EOFError:
+        return False
+    return ans in ("y", "yes")
+
+
 def cmd_reset(args):
+    if args.game is None:
+        args.game = "all"
+        if not args.dry_run and not getattr(args, "yes", False) and not confirm_all_games():
+            sys.exit(t("aborted"))
     keys = list(PROFILES) if args.game == "all" else [args.game]
     for k in keys:
         if k not in PROFILES:
@@ -336,7 +349,8 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("info"); p.add_argument("card"); p.set_defaults(fn=cmd_info)
     p = sub.add_parser("reset-records"); p.add_argument("card")
-    p.add_argument("--game", default="all"); p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--game", default=None); p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--yes", "-y", action="store_true", help="skip the confirmation when --game is omitted")
     p.add_argument("--keep", default=None)
     p.set_defaults(fn=cmd_reset)
     p = sub.add_parser("set-plays"); p.add_argument("card")

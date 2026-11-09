@@ -36,6 +36,7 @@ python popn_tool.py restore-played card.ps2 --from backup.ps2 --game popn7
 - `--game`: `popn7` `besthits` `popn8` `popn9` `popn10` `popn11` `popn12` `all` (`set-plays` also accepts `old` = popn7/besthits/8/9)
 - `--keep`: `plays,extra` / `plays` / `extra` / `none` (what to keep; defaults to each version's default)
 - `--dry-run`: preview only, do not write
+- If `--game` is omitted for `reset-records`, all titles are targeted and a confirmation prompt is shown (skip it with `--yes` / `-y`)
 - `--lang`: display language, `ja` or `en` (place it before the subcommand; defaults to the OS locale or the `POPN_LANG` environment variable)
 
 In the GUI, switch between 日本語 and English with the "Language" box at the top (your choice is remembered).
