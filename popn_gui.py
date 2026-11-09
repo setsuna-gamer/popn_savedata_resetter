@@ -46,7 +46,7 @@ class App(ttk.Frame):
 
         self.card = tk.StringVar()
         self.dry = tk.BooleanVar(value=True)
-        self.r_game = tk.StringVar(value="popn12")
+        self.r_game = tk.StringVar(value="all")
         self.p_game = tk.StringVar(value="old")
         self.s_game = tk.StringVar(value="popn7")
         self.p_min = tk.IntVar(value=1)
