@@ -39,6 +39,10 @@ MESSAGES = {
         "ja": "PCSX2 が起動中です。終了してから再実行してください",
         "en": "PCSX2 is running. Close it and run again"},
     "backup": {"ja": "バックアップ:", "en": "Backup:"},
+    "confirm_all": {
+        "ja": "--game が指定されていないため、全タイトル ({games}) のレコードをリセットします。続行しますか? [y/N]: ",
+        "en": "--game was not specified, so records for ALL titles ({games}) will be reset. Continue? [y/N]: "},
+    "aborted": {"ja": "中止しました", "en": "Aborted"},
     "done": {"ja": "完了", "en": "Done"},
     "restore_no_fields": {
         "ja": "復元するフィールドがありません (--keep plays,extra を指定してください)",
