@@ -23,5 +23,5 @@ jobs:
       - run: python build.py
       - uses: actions/upload-artifact@v4
         with:
-          name: popn-${{ runner.os }}
+          name: popn_savedata_resetter-${{ runner.os }}
           path: dist/*
