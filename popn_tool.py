@@ -336,7 +336,7 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("info"); p.add_argument("card"); p.set_defaults(fn=cmd_info)
     p = sub.add_parser("reset-records"); p.add_argument("card")
-    p.add_argument("--game", default="popn12"); p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--game", default="all"); p.add_argument("--dry-run", action="store_true")
     p.add_argument("--keep", default=None)
     p.set_defaults(fn=cmd_reset)
     p = sub.add_parser("set-plays"); p.add_argument("card")
