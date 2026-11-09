@@ -24,6 +24,8 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import ps2mc  # noqa: E402
+from i18n import t  # noqa: E402
+import i18n  # noqa: E402
 
 if getattr(sys, "frozen", False):  # PyInstaller でビルドされた実行ファイル
     HERE = os.path.dirname(os.path.abspath(sys.executable))
@@ -79,6 +81,11 @@ ALL_DIRS = {
     "popn11": "BISLPM-66065popn11", "popn12": "BISLPM-66314popn12",
     "popn13": "BISLPM-66533popn13", "popn14": "BISLPM-66742popn14",
 }
+def title_of(prof):
+    """Display title (the Japanese subtitle is romanized in English)."""
+    return prof["title"] if i18n.get_lang() == "ja" else prof["title"].replace("いろは", "Iroha")
+
+
 DEFAULT_RANK = [100000, 90000, 80000, 70000, 60000]
 
 
@@ -102,7 +109,7 @@ def parse_keep(text, prof):
     keep = tuple(x.strip() for x in text.split(","))
     bad = [x for x in keep if x not in ("plays", "extra")]
     if bad:
-        sys.exit(f"--keep に使えるのは plays / extra / none です: {bad}")
+        sys.exit(t("keep_invalid", bad=bad))
     return keep
 
 
@@ -134,7 +141,7 @@ def set_min_plays(buf, prof, minimum):
     """スロット領域の全譜面のプレイ回数を最低 minimum にする (増やすだけで減らさない)"""
     rec = prof["records"]
     if rec["mode"] != "slots":
-        sys.exit("このバージョンはスロット形式ではないため未対応です")
+        sys.exit(t("not_slot_format"))
     n = 0
     for o in range(rec["start"], rec["end"], 12):
         score, plays, combo, extra = struct.unpack_from("<IHHI", buf, o)
@@ -154,7 +161,7 @@ def restore_played(buf, old, prof, keep):
     """リセット済み buf に、old (リセット前) のプレイ済み情報だけを書き戻す"""
     rec = prof["records"]
     if rec["mode"] != "slots":
-        sys.exit("このバージョンはスロット形式ではないため未対応です")
+        sys.exit(t("not_slot_format"))
     for o in range(rec["start"], rec["end"], 12):
         s0, p0, c0, x0 = struct.unpack_from("<IHHI", old, o)
         score, plays, combo, extra = struct.unpack_from("<IHHI", buf, o)
@@ -206,7 +213,7 @@ def cmd_info(args):
             continue
         buf = bytearray(card.read_file(f))
         pos = find_checksum_pos(buf)
-        sup = "対応" if key in PROFILES else "未対応"
+        sup = t("info_supported") if key in PROFILES else t("info_unsupported")
         print(f"{key:7s} {dn:22s} {len(buf):6d}B  checksum@{hex(pos) if pos else '?':7s} [{sup}]")
 
 
@@ -214,7 +221,7 @@ def cmd_reset(args):
     keys = list(PROFILES) if args.game == "all" else [args.game]
     for k in keys:
         if k not in PROFILES:
-            sys.exit(f"{k} は未対応です。対応: {', '.join(PROFILES)}")
+            sys.exit(t("unsupported_game", game=k, supported=", ".join(PROFILES)))
     card = ps2mc.Card(args.card)
     jobs = []
     for k in keys:
@@ -223,61 +230,61 @@ def cmd_reset(args):
         if f is None:
             if args.game == "all":
                 continue
-            sys.exit(f"{prof['title']} のセーブがカード内に見つかりません")
+            sys.exit(t("save_not_found", title=title_of(prof)))
         buf = bytearray(card.read_file(f))
         pos = find_checksum_pos(buf)
         if pos is None:
-            sys.exit(f"{prof['title']}: チェックサムを検出できません (セーブが破損している可能性)。中止します")
+            sys.exit(t("checksum_corrupt", title=title_of(prof)))
         before = bytes(buf)
         reset_records(buf, prof, parse_keep(args.keep, prof))
         fix_checksum(buf, pos)
         changed = sum(1 for a, b in zip(before, buf) if a != b)
-        print(f"{prof['title']}: レコードをリセットします ({changed} バイト変更)")
+        print(t("reset_msg", title=title_of(prof), changed=changed))
         jobs.append((f, bytes(buf)))
     if args.dry_run:
-        print("--dry-run のため書き込みません")
+        print(t("dry_run_skip"))
         return
     if not jobs:
         return
     if pcsx2_running():
-        sys.exit("PCSX2 が起動中です。終了してから再実行してください")
-    print("バックアップ:", backup(args.card))
+        sys.exit(t("pcsx2_running"))
+    print(t("backup"), backup(args.card))
     for f, data in jobs:
         card.write_file(f, data)
     card.save()
-    print("完了")
+    print(t("done"))
 
 
 def cmd_restore(args):
     prof = PROFILES.get(args.game)
     if prof is None:
-        sys.exit(f"{args.game} は未対応です。対応: {', '.join(PROFILES)}")
+        sys.exit(t("unsupported_game", game=args.game, supported=", ".join(PROFILES)))
     keep = parse_keep(args.keep, prof)
     if not keep:
-        sys.exit("復元するフィールドがありません (--keep plays,extra を指定してください)")
+        sys.exit(t("restore_no_fields"))
     card = ps2mc.Card(args.card)
     src = ps2mc.Card(args.src)
     f, g = find_save(card, prof["dir"]), find_save(src, prof["dir"])
     if f is None or g is None:
-        sys.exit("カードまたはバックアップにセーブが見つかりません")
+        sys.exit(t("restore_save_missing"))
     buf = bytearray(card.read_file(f))
     pos = find_checksum_pos(buf)
     if pos is None:
-        sys.exit("チェックサムを検出できません。中止します")
+        sys.exit(t("checksum_fail"))
     before = bytes(buf)
     restore_played(buf, src.read_file(g), prof, keep)
     fix_checksum(buf, pos)
     changed = sum(1 for a, b in zip(before, buf) if a != b)
-    print(f"{prof['title']}: プレイ済み情報({', '.join(keep)})を復元します ({changed} バイト変更)")
+    print(t("restore_msg", title=title_of(prof), keep=", ".join(keep), changed=changed))
     if args.dry_run:
-        print("--dry-run のため書き込みません")
+        print(t("dry_run_skip"))
         return
     if pcsx2_running():
-        sys.exit("PCSX2 が起動中です。終了してから再実行してください")
-    print("バックアップ:", backup(args.card))
+        sys.exit(t("pcsx2_running"))
+    print(t("backup"), backup(args.card))
     card.write_file(f, bytes(buf))
     card.save()
-    print("完了")
+    print(t("done"))
 
 
 OLD_GAMES = ["popn7", "besthits", "popn8", "popn9"]
@@ -287,9 +294,9 @@ def cmd_setplays(args):
     keys = OLD_GAMES if args.game == "old" else [args.game]
     for k in keys:
         if k not in PROFILES:
-            sys.exit(f"{k} は未対応です。対応: {', '.join(PROFILES)}")
+            sys.exit(t("unsupported_game", game=k, supported=", ".join(PROFILES)))
     if not 1 <= args.min <= 1999:
-        sys.exit("--min は 1〜1999 で指定してください")
+        sys.exit(t("min_range"))
     card = ps2mc.Card(args.card)
     jobs = []
     for k in keys:
@@ -298,29 +305,34 @@ def cmd_setplays(args):
         if f is None:
             if args.game == "old":
                 continue
-            sys.exit(f"{prof['title']} のセーブがカード内に見つかりません")
+            sys.exit(t("save_not_found", title=title_of(prof)))
         buf = bytearray(card.read_file(f))
         pos = find_checksum_pos(buf)
         if pos is None:
-            sys.exit(f"{prof['title']}: チェックサムを検出できません。中止します")
+            sys.exit(t("checksum_corrupt", title=title_of(prof)))
         n = set_min_plays(buf, prof, args.min)
         fix_checksum(buf, pos)
-        print(f"{prof['title']}: {n} 譜面のプレイ回数を {args.min} にします")
+        print(t("setplays_msg", title=title_of(prof), n=n, min=args.min))
         jobs.append((f, bytes(buf)))
     if args.dry_run or not jobs:
-        print("--dry-run のため書き込みません" if args.dry_run else "")
+        print(t("dry_run_skip") if args.dry_run else "")
         return
     if pcsx2_running():
-        sys.exit("PCSX2 が起動中です。終了してから再実行してください")
-    print("バックアップ:", backup(args.card))
+        sys.exit(t("pcsx2_running"))
+    print(t("backup"), backup(args.card))
     for f, data in jobs:
         card.write_file(f, data)
     card.save()
-    print("完了")
+    print(t("done"))
 
 
 def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
+    pre = argparse.ArgumentParser(add_help=False)
+    pre.add_argument("--lang", choices=list(i18n.LANGS), help="ja | en")
+    known, _ = pre.parse_known_args()
+    if known.lang:
+        i18n.set_lang(known.lang)
+    ap = argparse.ArgumentParser(parents=[pre], description=__doc__, formatter_class=argparse.RawTextHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("info"); p.add_argument("card"); p.set_defaults(fn=cmd_info)
     p = sub.add_parser("reset-records"); p.add_argument("card")

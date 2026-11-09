@@ -22,3 +22,5 @@ Thumbs.db
 build/
 dist/
 *.spec
+
+popn_savedata_resetter.json
