@@ -24,3 +24,7 @@ dist/
 *.spec
 
 popn_savedata_resetter.json
+
+# Private agent notes (never commit)
+CLAUDE.local.md
+AGENTS.local.md

@@ -108,6 +108,9 @@ Never commit card images, backups or game data (`*.ps2`, `*.bin`, `backup/`, `sn
 - MIT licensed. The README disclaimer (use at own risk, unofficial, no affiliation with Konami or Sony, possible takedown) must stay in both READMEs.
 - Never add game data (ROMs, disc images, save data) to the repository.
 - Do not put personal information in committed files: no local file paths, usernames, e-mail addresses, API keys or tokens.
+- Personal or confidential information (local paths, account names, machine-specific notes, credentials) belongs only in
+  `CLAUDE.local.md` / `AGENTS.local.md` at the repository root. Both are git-ignored and must never be committed or pushed.
+  Read them if present for local context; never copy their contents into tracked files, commit messages, PRs or releases.
 
 ## Keeping CLAUDE.md and AGENTS.md in sync
 
